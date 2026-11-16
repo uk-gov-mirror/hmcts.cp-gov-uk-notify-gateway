@@ -24,6 +24,7 @@ import uk.gov.hmcts.cp.notification.blob.AttachmentDownloader;
 import uk.gov.hmcts.cp.notification.logging.AttachmentFailureClassifier;
 import uk.gov.hmcts.cp.notification.logging.DependencyCall;
 import uk.gov.hmcts.cp.notification.logging.DependencyCallLogger;
+import uk.gov.hmcts.cp.notification.logging.EmailSendLogger;
 import uk.gov.hmcts.cp.notification.logging.FailureReasonClassifier;
 import uk.gov.hmcts.cp.notification.logging.OutcomeReason;
 import uk.gov.hmcts.cp.notification.blob.PermanentBlobException;
@@ -125,8 +126,8 @@ class SendEmailTaskTest {
         task = new SendEmailTask(attachmentDownloader, materialAttachmentDownloader, emailSender,
                 new TransientFailurePolicy(statusService, new Clock(), dependencyCallLogger, failureReasonClassifier,
                         LEGACY_EMAIL_RETRY_DURATIONS),
-                executionService, objectMapper, new CpTaskFactory(objectMapper, clock), dependencyCallLogger,
-                govNotifyFailureClassifier, new AttachmentFailureClassifier(), LEGACY_EMAIL_RETRY_DURATIONS);
+                executionService, objectMapper, new CpTaskFactory(objectMapper, clock),
+                new EmailSendLogger(dependencyCallLogger), govNotifyFailureClassifier, new AttachmentFailureClassifier(), LEGACY_EMAIL_RETRY_DURATIONS);
     }
 
     @Test

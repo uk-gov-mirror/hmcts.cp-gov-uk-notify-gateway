@@ -1,16 +1,17 @@
 package uk.gov.hmcts.cp.notification.sender;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.hmcts.cp.notification.logging.Dependency;
 import uk.gov.hmcts.cp.notification.logging.DependencyCall;
 import uk.gov.hmcts.cp.notification.logging.DependencyCallLogger;
+import uk.gov.hmcts.cp.notification.logging.EmailSendLogger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -40,7 +41,6 @@ class EmailSenderTest {
     @Mock
     private DependencyCallLogger dependencyCallLogger;
 
-    @InjectMocks
     private EmailSender emailSender;
 
     @Captor
@@ -49,6 +49,11 @@ class EmailSenderTest {
     private ArgumentCaptor<DependencyCall> dependencyCallCaptor;
     @Captor
     private ArgumentCaptor<String> messageCaptor;
+
+    @BeforeEach
+    void createEmailSenderLoggingThroughTheMockedDependencyCallLogger() {
+        emailSender = new EmailSender(senderFactory, new EmailSendLogger(dependencyCallLogger));
+    }
 
     @Test
     void logs_a_successful_send_to_the_dependency_of_the_selected_client() {

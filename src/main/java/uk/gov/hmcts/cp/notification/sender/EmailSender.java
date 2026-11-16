@@ -1,19 +1,12 @@
 package uk.gov.hmcts.cp.notification.sender;
 
-import static java.lang.String.format;
-import static java.util.Optional.empty;
-import static uk.gov.hmcts.cp.notification.logging.CallOutcome.SUCCEEDED;
-import static uk.gov.hmcts.cp.notification.logging.Channel.EMAIL;
-import static uk.gov.hmcts.cp.notification.logging.Operation.SEND;
-
 import com.azure.storage.blob.BlobUrlParts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import uk.gov.hmcts.cp.notification.command.SendEmailCommand;
 import uk.gov.hmcts.cp.notification.logging.Dependency;
-import uk.gov.hmcts.cp.notification.logging.DependencyCall;
-import uk.gov.hmcts.cp.notification.logging.DependencyCallLogger;
+import uk.gov.hmcts.cp.notification.logging.EmailSendLogger;
 
 import java.util.UUID;
 
@@ -21,7 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EmailSender {
     private final EmailClientFactory emailClientFactory;
-    private final DependencyCallLogger dependencyCallLogger;
+    private final EmailSendLogger emailSendLogger;
 
     public SendResult sendEmail(final SendEmailCommand command, final Attachment attachment) {
         final SendEmailRequest request = new SendEmailRequest(
@@ -37,14 +30,11 @@ public class EmailSender {
         final EmailClient emailClient = emailClientFactory.selectFor(request);
         final SendResult sendResult = emailClient.send(request);
         final Dependency dependency = emailClient.dependency();
-        final DependencyCall dependencyCall = new DependencyCall(dependency, SEND, EMAIL, SUCCEEDED, empty(), empty());
         final Class<? extends EmailClient> emailClientClass = emailClient.getClass();
         final String emailClientName = emailClientClass.getSimpleName();
         final UUID notificationId = command.notificationId();
         final String reference = sendResult.reference();
-        final String message = format(
-                "Sent notification '%s' via '%s' (reference '%s')", notificationId, emailClientName, reference);
-        dependencyCallLogger.info(dependencyCall, message);
+        emailSendLogger.sent(notificationId, dependency, emailClientName, reference);
         return sendResult;
     }
 

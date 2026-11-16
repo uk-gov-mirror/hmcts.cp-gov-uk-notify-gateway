@@ -15,6 +15,7 @@ import tools.jackson.databind.json.JsonMapper;
 import uk.gov.hmcts.cp.notification.logging.AttachmentFailureClassifier;
 import uk.gov.hmcts.cp.notification.logging.DependencyCall;
 import uk.gov.hmcts.cp.notification.logging.DependencyCallLogger;
+import uk.gov.hmcts.cp.notification.logging.LetterSendLogger;
 import uk.gov.hmcts.cp.notification.logging.FailureReasonClassifier;
 import uk.gov.hmcts.cp.notification.material.MaterialAttachmentDownloader;
 import uk.gov.hmcts.cp.notification.material.MaterialAttachmentException;
@@ -99,8 +100,8 @@ class SendLetterTaskTest {
         task = new SendLetterTask(materialAttachmentDownloader, govNotifyClient,
                 new TransientFailurePolicy(statusService, clock, dependencyCallLogger, failureReasonClassifier,
                         List.of(1L)),
-                executionService, new CpTaskFactory(JsonMapper.builder().build(), clock), dependencyCallLogger,
-                govNotifyFailureClassifier, new AttachmentFailureClassifier(), LEGACY_LETTER_RETRY_DURATIONS);
+                executionService, new CpTaskFactory(JsonMapper.builder().build(), clock),
+                new LetterSendLogger(dependencyCallLogger), govNotifyFailureClassifier, new AttachmentFailureClassifier(), LEGACY_LETTER_RETRY_DURATIONS);
     }
 
     @Test
